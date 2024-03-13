@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="centered-v">
+        <div class="centered-h">
+            <div class="plain-card">
+                <h1>Создать аккаунт администратора</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-field">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                            </label>
+                            <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
+                        </div>
+                    {% endfor %}
+                    <div class="centered-h">
+                        <button type="submit" class="btn-submit">Зарегистрироваться как администратор</button>
+                    </div>
+                </form>
+                <p class="accent" style="text-align: center">
+                    Если вы не являетесь Администратором, попросите Администратора создать для вас учетную запись.<br>
+                    <a href="{% url 'signin' %}">Войти в существующий аккаунт</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

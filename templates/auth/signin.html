@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="centered-v">
+        <div class="centered-h">
+            <div class="plain-card">
+                <h1>Вход в систему</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for error in form.non_field_errors %}
+                    	{{ error }}
+                    {% endfor %}
+                    
+                    {% for field in form %}
+                        <div class="form-field">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                            </label>
+                            <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
+                        </div>
+                    {% endfor %}
+                    <div class="centered-h">
+                        <button type="submit" class="btn-submit">Войти</button>
+                    </div>
+                </form>
+                <p class="accent">
+                    Если вы Администратор - <a href="{% url 'signup' %}">создайте аккаунт</a>, иначе - попросите
+                    вашего администратора, чтобы он создал его для вас
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

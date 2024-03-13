@@ -1,0 +1,5 @@
+/db.sqlite3
+/config.ini
+/.idea/
+/.venv/
+/dbot_app/migrations/

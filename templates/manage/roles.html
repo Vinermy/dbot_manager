@@ -1,0 +1,51 @@
+{% extends 'extended_base.html' %}
+
+{% block body %}
+	<div class="centered-h">
+        <div class="flex-column" style="width: 70%;">
+            <div class="accented-card" style="margin-bottom: 1rem; width: 100%">
+                <h3>Создать роль:</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-field">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                            </label>
+                            <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
+                        </div>
+                    {% endfor %}
+                    <div class="centered-h">
+                        <button type="submit" class="btn-submit">Добавить роль</button>
+                    </div>
+                </form>
+            </div>
+            <div class="plain-card" style="width: 100%;">
+                <h3>Роли:</h3>
+                <table style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                Название
+                            </th>
+                            <th>
+                                Количество учетных записей с этой ролью
+                            </th>
+                        </tr>
+                    </thead>
+
+                    {% for role in roles %}
+                    	<tr>
+                            <td>
+                                {{ role.name }}
+                            </td>
+                            <td>
+                                {{ role.profiles.count }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

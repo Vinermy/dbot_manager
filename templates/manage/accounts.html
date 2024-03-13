@@ -1,0 +1,105 @@
+{% extends 'extended_base.html' %}
+
+{% block body %}
+    <div class="centered-h">
+        <div class="flex-column" style="width: 70%;">
+            <div class="accented-card" style="margin-bottom: 1rem; width: 100%">
+                <h3>Аккаунты администраторов:</h3>
+                <table style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                Имя и фамилия
+                            </th>
+                            <th>
+                                E-mail
+                            </th>
+                            <th>
+                                Дата и время последнего входа
+                            </th>
+                        </tr>
+                    </thead>
+
+                    {% for admin in admins %}
+                    	<tr>
+                            <td>
+                                {{ admin.get_full_name }}
+                            </td>
+                            <td>
+                                {{ admin.email }}
+                            </td>
+                            <td>
+                                {{ admin.last_login|date:"d.m.Y H:i" }}
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <div class="plain-card" style="width: 100%; margin-bottom: 1rem">
+                <h3>Создать новый аккаунт:</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-field">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
+                        </div>
+                    {% endfor %}
+
+                    <div class="form-field">
+                        <label class="form-label" for="role-id">Роль</label>
+                        <select class="form-input" id="role-id" name="role">
+                            {% for role in roles %}
+                            	<option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Создать</button>
+                </form>
+            </div>
+
+            <div class="plain-card" style="width: 100%;">
+                <h3>Прочие аккаунты:</h3>
+                <table style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                Имя и фамилия
+                            </th>
+                            <th>
+                                E-mail
+                            </th>
+                            <th>
+                                Роль
+                            </th>
+                            <th>
+                                Дата и время последнего входа
+                            </th>
+                        </tr>
+                    </thead>
+
+                    {% for pleb in plebs %}
+                    	<tr>
+                            <td>
+                                {{ pleb.get_full_name }}
+                            </td>
+                            <td>
+                                {{ pleb.email }}
+                            </td>
+                            <td>
+                                {{ pleb.role.name }}
+                            </td>
+                            <td>
+                                {{ pleb.last_login|date:"d.m.Y H:i" }}
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock body %}
