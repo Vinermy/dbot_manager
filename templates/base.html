@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <title>Title</title>
     {% load static %}
+    {% load tz %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    {% block content %}
-        
-    {% endblock %}
+    {% localtime %}
+        {% block content %}
+            
+        {% endblock %}
+    {% endlocaltime %}
 </body>
 </html>

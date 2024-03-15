@@ -1,6 +1,11 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from . import models
+from .models import DBotPartKind
+
+class BetterChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.name
 
 
 class SignupForm(UserCreationForm):
@@ -39,3 +44,23 @@ class RoleForm(forms.ModelForm):
         labels = {
             'name': 'Название'
         }
+
+class PartForm(forms.ModelForm):
+    kind = BetterChoiceField(queryset=DBotPartKind.objects.all(), label='', required=True, empty_label=None,
+                             widget=forms.Select(attrs={'class': 'form-input'}))
+    class Meta:
+        model = models.DBotPart
+        fields = ('name', 'vendor_code', 'manufacture_date', 'weight')
+        labels = {
+            'name': 'Название',
+            'vendor_code': 'Артикул',
+            'manufacture_date': 'Дата изготовления',
+            'weight': 'Вес в граммах',
+        }
+
+class UploadFileForm(forms.Form):
+    parts = forms.FileField(
+        widget=forms.FileInput(attrs={'accept': '.xlsx'}),
+        label='Файл с деталями',
+        help_text='Загрузите файл в формате .xlsx'
+    )

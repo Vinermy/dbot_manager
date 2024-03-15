@@ -3,3 +3,5 @@
 /.idea/
 /.venv/
 /dbot_app/migrations/
+/temp.xlsx
+/output.pdf

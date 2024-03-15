@@ -32,6 +32,27 @@ table tr:hover td {
 
 }
 
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: .1rem solid;
+    padding: 0;
+    border-color: inherit;
+}
+
+.plain-card > hr {
+    margin: 0 -0.9rem;
+}
+
+.accented-card > hr {
+    margin: 1rem -0.9rem;
+}
+
+p {
+
+}
+
 .accent > a {
     color: #7077A1;
     font-weight: bold;
@@ -53,6 +74,27 @@ table tr:hover td {
     width: fit-content;
 }
 
+.plain-card-hoverable {
+    border: #7077A1 solid .1rem;
+    border-radius: .8rem;
+    padding: .9rem;
+    width: fit-content;
+    transition: all .2s ease-out;
+
+}
+
+.plain-card-hoverable:hover {
+    border: #F6B17A solid .1rem;
+    cursor: pointer;
+    transition: all .2s ease-in-out;
+    box-shadow: #424769 0 .5rem 1rem;
+}
+
+.hidden-link {
+    text-decoration: none;
+    color: #7077A1;
+}
+
 h1 {
     color: #F6B17A;
     width: 100%;
@@ -71,6 +113,7 @@ h3 {
     border-radius: .8rem;
     padding: .9rem;
     width: fit-content;
+    box-shadow: #424769 0 .5rem 2rem;
 }
 
 .accent {
@@ -99,12 +142,15 @@ h3 {
     font-family: "Montserrat", system-ui, sans-serif;
     font-size: medium;
     transition: all .2s ease-out;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .btn-submit:hover {
     color: #2D3250;
     background: #F6B17A;
     transition: all .2s ease-in-out;
+    cursor: pointer;
 }
 
 
@@ -114,6 +160,27 @@ h3 {
     margin-bottom: 1rem;
     display: flex;
     flex-direction: row;
+    transition: all .2s ease-in-out;
+
+}
+
+.form-field > .btn-submit:last-child {
+    border-radius: 0 .3rem .3rem 0;
+    margin: -.1rem;
+    border: #F6B17A solid .1rem;
+    padding: .3rem;
+    background-color: #F6B17A;
+    color: #2D3250;
+    transition: all .2s ease-in-out;
+
+}
+
+.form-field > .btn-submit:last-child:hover {
+    background-color: #7077A1;
+    border-color: #7077A1;
+    color: #F6B17A;
+    transition: all .2s ease-in-out;
+
 }
 
 .form-label {
@@ -136,10 +203,18 @@ h3 {
     transition: all .2s ease-in-out;
 }
 
-.form-input:focus {
-    outline: #F6B17A solid .2rem;
+.form-input:last-child {
     border-radius: 0 .3rem .3rem 0;
+}
+
+.form-input:focus {
     color: #F6B17A;
+    outline: none;
+    transition: all .2s ease-in-out;
+}
+
+.form-field:focus-within {
+    outline: #F6B17A solid .2rem;
     transition: all .2s ease-in-out;
 }
 
@@ -168,6 +243,7 @@ header > a:hover {
 .flex-row {
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 .flex-column {
@@ -178,4 +254,8 @@ header > a:hover {
 
 .spread-evenly {
     justify-content: space-around;
+}
+
+.spread-between {
+    justify-content: space-between;
 }

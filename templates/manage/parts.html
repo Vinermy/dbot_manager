@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <a class="btn-submit" href="{% url 'home' %}">На главную</a>
+	<h1>Детали</h1>
+    <div class="accented-card" style="margin: 0 auto; margin-bottom: 1rem">
+        <h3>Добавить</h3>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form-kind" value="add-part">
+            {% for field in part_form %}
+            	<div class="form-field">
+
+                    {% if field.widget_type != "select" %}
+                        <label class="form-label" for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        <input type="{{ field.widget_type }}" class="form-input" name="{{ field.name }}" id="{{ field.id_for_label }}">
+                    {% else %}
+                        <label class="form-label" for="{{ field.id_for_label }}">
+                            Вид детали
+                        </label>
+                        {{ field.render }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-submit">Создать</button>
+        </form>
+    </div>
+
+    <div class="accented-card" style="margin: 0 auto; margin-bottom: 1rem">
+        <h3>Добавить из файла</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="form-kind" value="add-part-file">
+            {% for field in file_form %}
+            	<div class="form-field">
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-submit">Добавить</button>
+        </form>
+    </div>
+
+    <div class="accented-card" style="margin: 0 auto; margin-bottom: 1rem">
+        <h3>Добавить вид детали</h3>
+        <form method="post">
+            <input type="hidden" name="form-kind" value="add-part-kind">
+            {% csrf_token %}
+            <div class="form-field">
+                <label class="form-label" for="name-id">Название</label>
+                <input type="text" id="name-id" name="name" class="form-input">
+            </div>
+            <button type="submit" class="btn-submit">Добавить</button>
+        </form>
+    </div>
+    <table style="width: 70%; margin: 0 auto; margin-bottom: 1rem;">
+        <thead>
+            <tr>
+                <th>
+                    Название
+                </th>
+                <th>
+                    Деталей этого типа
+                </th>
+            </tr>
+        </thead>
+        {% for kind in kinds %}
+            <tr>
+                <td>
+                    {{ kind.name }}
+                </td>
+                <td>
+                    {{ kind.parts.count }}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2" class="accent" style="text-align: center">
+                    Нет типов деталей
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <table style="width: 70%; margin: 0 auto">
+        <thead>
+            <tr>
+                <th>
+                    Название
+                </th>
+                <th>
+                    Артикул
+                </th>
+                <th>
+                    Тип
+                </th>
+                <th>
+                    Вес
+                </th>
+                <th>
+                    Дата изготовления
+                </th>
+
+            </tr>
+        </thead>
+        {% for part in parts %}
+            <tr>
+                <td>
+                    {{ part.name }}
+                </td>
+                <td>
+                    {{ part.vendor_code }}
+                </td>
+                <td>
+                    {{ part.kind.name }}
+                </td>
+                <td>
+                    {{ part.weight }}г
+                </td>
+                <td>
+                    {{ part.manufacture_date|date:"d.m.Y" }}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="accent" style="text-align: center">
+                    Нет типов деталей
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

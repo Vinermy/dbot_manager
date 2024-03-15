@@ -13,11 +13,9 @@
                                 {{ field.label }}
                             </label>
                             <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
+                            <button type="submit" class="btn-submit">Добавить роль</button>
                         </div>
                     {% endfor %}
-                    <div class="centered-h">
-                        <button type="submit" class="btn-submit">Добавить роль</button>
-                    </div>
                 </form>
             </div>
             <div class="plain-card" style="width: 100%;">

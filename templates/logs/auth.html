@@ -1,0 +1,47 @@
+{% extends 'extended_base.html' %}
+
+{% block body %}
+    <h1>Логи авторизации</h1>
+	<table style="width: 100%">
+        <thead>
+            <tr>
+                <th>
+                    Логин
+                </th>
+                <th>
+                    IP адрес
+                </th>
+                <th>
+                    Устройство
+                </th>
+                <th>
+                    Время входа
+                </th>
+                <th>
+                    Время выхода (если есть)
+                </th>
+            </tr>
+        </thead>
+        {% for login in logins %}
+        	<tr>
+                <td>
+                    {{ login.username }}
+                </td>
+                <td>
+                    {{ login.ip_address }}
+                </td>
+                <td>
+                    {{ login.user_agent|truncatechars:50 }}
+                </td>
+                <td>
+                    {{ login.attempt_time|date:"c" }}
+                </td>
+                <td>
+                    {{ login.logout_time|date:"c"|default:"отсутствует" }}
+                </td>
+
+            </tr>
+        {% endfor %}
+
+    </table>
+{% endblock %}

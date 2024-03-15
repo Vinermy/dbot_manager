@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <a class="btn-submit" href="{% url 'processes_main' %}">К бизнес процессам</a>
+	<h1>{{ process.bot.name }}</h1>
+    <h3 style="text-align: center">{{ process.bot.vendor_code }}</h3>
+    <div class="flex-row spread-evenly">
+        {% for stage in stages %}
+        	<div class="{% if stage.id == process.stage.id %} accented-card {% else %} plain-card {% endif %}" style="margin: 0 .5rem; height: ">
+                <div style="height: 8rem; overflow: hidden">
+                    <h3>{{ stage.name }}</h3>
+                    <p class="accent" style="">{{ stage.responsible_role.name }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div style="width: 90%; margin: 0 auto;">
+        {% if not process.is_finished %}
+        	{% if process.stage.responsible_role == request.user.role %}
+                <div class="plain-card" style="width: 100%; margin-bottom: 1rem; margin-top: 1rem;">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form-kind" value="actions">
+                        <div class="flex-row spread-between">
+                            {% if process.stage.previous_stage is not None %}
+                                <div>
+                                    <button type="submit" name="action" value="revert" class="btn-submit">Вернуть на предыдущую стадию</button>
+                                </div>
+                            {% endif %}
+
+                            <div>
+                                {% if process.stage.next_stage %}
+                                    <button type="submit" name="action" value="advance" class="btn-submit">
+                                        Продвинуть на следующую стадию
+                                    </button>
+                                {% else %}
+                                    <button type="submit" name="action" value="finish" class="btn-submit">
+                                        Завершить
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="plain-card" style="width: 100%">
+                    <h3>{{ process.bot.name }}</h3>
+                    <div style="margin-bottom: .2rem;">
+                        <span class="accent">Артикул:</span>
+                        <span>{{ process.bot.vendor_code }}</span>
+                    </div>
+                    <div style="margin-bottom: .2rem;">
+                        <span class="accent">Стадия разработки:</span>
+                        <span>{{ process.bot.get_state_display }}</span>
+                    </div>
+                    <div style="margin-bottom: .2rem;">
+                        <span class="accent">Вес:</span>
+                        <span>{{ process.bot.weight_kg }}кг</span>
+                    </div>
+                    {% if not process.stage.next_stage %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="form-kind" value="set-price">
+                            <div class="form-field">
+                                <label class="form-label" for="price-id">Установить цену</label>
+                                <input type="number" min=0 id="price-id" name="price" step="any" value="{{ process.bot.price }}" class="form-input">
+                                <button type="submit" class="btn-submit">Сохранить</button>
+                            </div>
+                        </form>
+                    {% endif %} 
+                    <h3>Список деталей</h3>
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Название
+                                </th>
+                                <th>
+                                    Артикул
+                                </th>
+                                <th>
+                                    Вид детали
+                                </th>
+                                <th>
+                                    Вес
+                                </th>
+                            </tr>
+                        </thead>
+                        {% for part in process.bot.parts.all %}
+                            <tr>
+                                <td>
+                                    {{ part.name }}
+                                </td>
+                                <td>
+                                    {{ part.vendor_code }}
+                                </td>
+                                <td>
+                                    {{ part.kind.name }}
+                                </td>
+                                <td>
+                                    {{ part.weight }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                </div>
+                {% if process.stage.requires_parts_access %}
+                    <div class="plain-card " style="width: 100%; margin-top: 1rem;">
+                        <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form-kind" value="add-part-to-bot">
+                            <div class="form-field" style="margin-bottom: 1rem">
+                                <label for="part-id" class="form-label">Добавить деталь</label>
+                                <select class="form-input" id="part-id" name="part">
+                                    {% for part in parts %}
+                                        <option value="{{ part.id }}">
+                                            {{ part.kind.name }} - {{ part.name }} ({{ part.vendor_code }})
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+                                <button class="btn-submit">Добавить</button>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+            {% else %}
+                <h1>У вас нет доступа к бизнес-процессу в текущей стадии</h1>
+                <h3 style="width: 100%; text-align: center">
+                    Текущая стадия - {{ process.stage.name }}.
+                    Роль, необходимая для доступа - {{ process.stage.responsible_role.name }}.
+                    Ваша роль - {{ request.user.role.name|default:"Администратор" }}
+                </h3>
+            {% endif %}
+        {% else %}
+        	<h1>Бизнес-процесс уже завершен</h1>
+        {% endif %}
+
+        <div class="plain-card" style="margin-top: 1rem; width: 100%">
+            <h3>Комментарии</h3>
+            {% if request.user.role == process.stage.responsible_role and not process.is_finished %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="form-kind" value="add-comment">
+                    <div class="form-field">
+                        <label for="comment-id" class="form-label">Текст комментария</label>
+                        <textarea class="form-input" id="comment-id" rows="5" name="comment"></textarea>
+                        <button type="submit" class="btn-submit">Добавить</button>
+                    </div>
+                </form>
+            {% endif %}
+
+            {% for comment in comments %}
+                <hr>
+                <h3>{{ comment.author.get_full_name|default:"Система" }} - {{ comment.author.role.name|default:"отслеживание бизнес-процессов" }} ({{ comment.timestamp|date:"d.m.Y" }})</h3>
+                <p class="{% if comment.author is None %}
+                	accent
+                {% endif %} ">
+                    {{ comment.text }}
+                </p>
+            {% endfor %}
+
+        </div>
+    </div>
+{% endblock %}

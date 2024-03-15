@@ -4,6 +4,9 @@
         <a href="{% url 'home' %}">Главная</a>
         <a href="{% url 'manage_roles' %}">Редактировать роли</a>
         <a href="{% url 'manage_accounts' %}">Управлять учетными записями</a>
+        {% if request.user.is_staff %}
+        	<a href="{% url 'admin_menu' %}">Прочее</a>
+        {% endif %} 
         {% if request.user.is_authenticated %}
             <span class="">Вы вошли как {{ request.user.get_full_name }}</span>
         {% endif %}

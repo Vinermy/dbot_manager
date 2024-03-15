@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<a href="{% url 'home' %}" class="btn-submit">На главную</a>
+    <div class="centered-h">
+        <div style="display: flex; flex-direction: column; align-items: center">
+            <h1>Активные бизнес-процессы</h1>
+            <div class="accented-card">
+                <a class="btn-submit" href="{% url 'processes_new' %}">Создать новый</a>
+                {% for process in processes %}
+                    <hr>
+                    <a href="{% url 'process' process.id %}" class="hidden-link">
+                        <div class="plain-card-hoverable">
+                            <h3>{{ process.bot.name }}</h3>
+                            <h5>{{ process.bot.vendor_code }}</h5>
+                            {% if process.is_finished %}
+                                Бизнес-процесс завершен
+                            {% else %}
+                                {{ process.stage.name }}
+                            {% endif %}
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

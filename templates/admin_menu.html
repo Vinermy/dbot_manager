@@ -1,0 +1,116 @@
+{% extends 'extended_base.html' %}
+
+{% block body %}
+
+    <div class="centered-h">
+        <div style="display: flex; flex-direction: column; align-items: center">
+            <div class="plain-card" style="margin-bottom: 1rem">
+                <div class="flex-row spread-between">
+                    <h3>Последние успешные авторизации</h3>
+                    <a class="btn-submit" style="height: min-content; margin-left: 4rem; align-self: center" href="{% url 'auth_logs' %}">
+                        Посмотреть логи авторизации
+                    </a>
+                </div>
+                <table style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                Логин
+                            </th>
+                            <th>
+                                IP адрес
+                            </th>
+                            <th>
+                                Дата и время входа
+                            </th>
+                            <th>
+                                Дата и время выхода
+                            </th>
+                        </tr>
+                    </thead>
+
+                    {% for login in last_logins %}
+                        <tr>
+                            <td>
+                                {{ login.username }}
+                            </td>
+                            <td>
+                                {{ login.ip_address }}
+                            </td>
+                            <td>
+                                {{ login.attempt_time|date:"d.m.Y H:i" }}
+                            </td>
+                            <td>
+                                {{ login.logout_time|date:"d.m.Y H:i" }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                </table>
+            </div>
+            <div class="plain-card">
+                <h3>Стадии бизнес-процессов:</h3>
+                <div class="accented-card" style="margin: 0 auto .3rem auto">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form-type" value="add-stage">
+                        <div class="form-field">
+                            <label class="form-label" for="name-id">Название</label>
+                            <input type="text" id="name-id" name="name" class="form-input" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="role-id">Ответственная роль</label>
+                            <select id="role-id" name="role" required class="form-input">
+                                {% for role in roles %}
+                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="prev-stage-id">Следует после</label>
+                            <select id="prev-stage-id" name="prev_stage" class="form-input" required>
+                                <option selected value="None">Без предыдущего этапа</option>
+                                {% for stage in stages %}
+                                    <option value="{{ stage.id }}">{{ stage.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Добавить</button>
+                    </form>
+                </div>
+                <table style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>
+                                Название
+                            </th>
+                            <th>
+                                Ответственная роль
+                            </th>
+                            <th>
+                                Следует после
+                            </th>
+                        </tr>
+                    </thead>
+                    {% for stage in stages %}
+                    	<tr>
+                            <td>
+                                {{ stage.name }}
+                            </td>
+                            <td>
+                                {{ stage.responsible_role.name }}
+                            </td>
+                            <td>
+                                {{ stage.previous_stage.name|default:"Нет предыдущего этапа" }}
+                            </td>
+                            
+                        </tr>
+                    {% endfor %}
+                    
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<a class="btn-submit" href="{% url 'home' %}">На главную</a>
+    <h1>Роботы</h1>
+    <div class="centered-h">
+        <a class="btn-submit" href="{% url 'generate_price_list' %}">Получить прайс-лист</a>
+    </div>
+    <div style="width: 90%; margin: 0 auto;">
+        {% for bot in bots %}
+            <div class="{% if bot.is_sellable %} accented-card {% else %} plain-card {% endif %}" style="width: 100%; margin: 1.5rem 0">
+                <h3>{{ bot.name }} ({{ bot.vendor_code }})</h3>
+                <div>
+                    <span class="accent">{{ bot.get_state_display }}</span>
+                </div>
+                <div>
+                    Стоимость:
+                    <span class="accent">{{ bot.price }}</span>
+                </div>
+                <div>
+                    Вес:
+                    <span class="accent">{{ bot.weight_kg }}кг</span>
+                </div>
+                {% if request.user.can_edit_bots and bot.is_sellable %}
+                	<form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="bot-id" value="{{ bot.id }}">
+                        <button type="submit" class="btn-submit" style="margin-top: 1rem;">Снять с производства</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+    </div>
+{% endblock %}
