@@ -34,6 +34,10 @@ def signup(request):
             user.save()
             login(request, user, backend='axes.backends.AxesBackend')
             return redirect('home')
+        else:
+            print(form.data)
+            print(form.error_messages)
+            print([(field.name, field.errors, '\n') for field in form])
     else:
         form = forms.SignupForm()
     return render(request, 'auth/signup.html', {'form': form})

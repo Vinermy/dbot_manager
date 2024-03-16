@@ -3,26 +3,42 @@
 {% block content %}
     <div class="centered-v">
         <div class="centered-h">
-            <div class="plain-card">
-                <h1>Создать аккаунт администратора</h1>
-                <form method="post">
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div class="form-field">
-                            <label for="{{ field.id_for_label }}" class="form-label">
-                                {{ field.label }}
-                            </label>
-                            <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
-                        </div>
-                    {% endfor %}
-                    <div class="centered-h">
-                        <button type="submit" class="btn-submit">Зарегистрироваться как администратор</button>
+            <div>
+                {% if form.password2.errors %}
+                    <div class="accented-card" style="margin-bottom: 1rem; width: 100%">
+                        <h3>Пароль не соответствует требованиям</h3>
+                        <ul>
+                            <li>Пароль не должен совпадать с остальной информацией</li>
+                            <li>Пароль должен содержать не менее 8 символов</li>
+                            <li>Пароль не может состоять только из цифр</li>
+                            <li>Пароль не должен быть часто используемым</li>
+                        </ul>
                     </div>
-                </form>
-                <p class="accent" style="text-align: center">
-                    Если вы не являетесь Администратором, попросите Администратора создать для вас учетную запись.<br>
-                    <a href="{% url 'signin' %}">Войти в существующий аккаунт</a>
-                </p>
+                {% endif %}
+                <div class="plain-card"  style="width: 100%">
+                    <h1>Создать аккаунт администратора</h1>
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-field">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    {{ field.label }}
+                                </label>
+                                <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input" required>
+                            </div>
+                            <div class="form-help">
+                                {{ field.help_text }}
+                            </div>
+                        {% endfor %}
+                        <div class="centered-h">
+                            <button type="submit" class="btn-submit">Зарегистрироваться как администратор</button>
+                        </div>
+                    </form>
+                    <p class="accent" style="text-align: center">
+                        Если вы не являетесь Администратором, попросите Администратора создать для вас учетную запись.<br>
+                        <a href="{% url 'signin' %}">Войти в существующий аккаунт</a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>

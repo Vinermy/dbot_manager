@@ -49,8 +49,10 @@ hr {
     margin: 1rem -0.9rem;
 }
 
-p {
-
+.form-help {
+    margin-top: -.8rem;
+    margin-bottom: .7rem;
+    min-height: .3rem;
 }
 
 .accent > a {

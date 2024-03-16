@@ -13,13 +13,13 @@ class SignupForm(UserCreationForm):
         label='Пароль',
         strip=False,
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
-        help_text='',
+        help_text='Минимум 8 символов. Минимум 1 буква или специальный символ',
     )
     password2 = forms.CharField(
         label='Подтверждение пароля',
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
         strip=False,
-        help_text='',
+        help_text='Совпадает с паролем',
     )
     class Meta:
         model = models.Profile
@@ -30,6 +30,13 @@ class SignupForm(UserCreationForm):
             'username': 'Логин',
             'email': 'E-mail',
         }
+        help_texts = {
+            'first_name': '',
+            'last_name': '',
+            'username': 'Не более 150 символов. Может содержать только латинские буквы, цифры и символы из набора @/./+/-/_',
+            'email': 'Должен быть действительным адресом электронной почты',
+        }
+
 
 class SigninForm(forms.Form):
     username = forms.CharField(label='Логин')
