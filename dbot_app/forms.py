@@ -47,10 +47,14 @@ class SigninForm(forms.Form):
 class RoleForm(forms.ModelForm):
     class Meta:
         model = models.Role
-        fields = ('name',)
+        fields = ('name', 'can_edit_parts', 'can_edit_bots', 'can_start_process',)
         labels = {
-            'name': 'Название'
+            'name': 'Название',
+            'can_edit_parts': 'Имеет доступ к редактированию деталей',
+            'can_edit_bots': 'Имеет доступ к редактированию роботов',
+            'can_start_process': 'Может начать бизнес-процесс',
         }
+
 
 class PartForm(forms.ModelForm):
     kind = BetterChoiceField(queryset=DBotPartKind.objects.all(), label='', required=True, empty_label=None,

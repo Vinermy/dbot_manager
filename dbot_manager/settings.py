@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import datetime
 from pathlib import Path
 from configparser import ConfigParser
 
@@ -136,5 +136,6 @@ AUTH_USER_MODEL = 'dbot_app.Profile'
 
 # Axes
 AXES_FAILURE_LIMIT = 3
-AXES_COOLOFF_TIME = 5 / 60
+AXES_COOLOFF_TIME = datetime.timedelta(minutes=5)
 AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_TEMPLATE = 'auth/lockout.html'

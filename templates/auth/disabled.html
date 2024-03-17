@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class="centered-h">
+        <div class="centered-v">
+            <div class="accented-card">
+                <h1>Учетная запись была отключена администратором</h1>
+                <a class="btn-submit" href="{% url 'signin' %}">Войти в другую учетную запись</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

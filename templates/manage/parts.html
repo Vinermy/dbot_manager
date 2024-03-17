@@ -67,6 +67,9 @@
                 <th>
                     Деталей этого типа
                 </th>
+                <th>
+                    
+                </th>
             </tr>
         </thead>
         {% for kind in kinds %}
@@ -77,10 +80,18 @@
                 <td>
                     {{ kind.parts.count }}
                 </td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form-kind" value="remove-kind">
+                        <input type="hidden" name="kind-id" value="{{ kind.id }}">
+                        <button type="submit" class="btn-submit">Удалить</button>
+                    </form>
+                </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="2" class="accent" style="text-align: center">
+                <td colspan="3" class="accent" style="text-align: center">
                     Нет типов деталей
                 </td>
             </tr>
@@ -104,7 +115,7 @@
                 <th>
                     Дата изготовления
                 </th>
-
+                <th></th>
             </tr>
         </thead>
         {% for part in parts %}
@@ -123,6 +134,14 @@
                 </td>
                 <td>
                     {{ part.manufacture_date|date:"d.m.Y" }}
+                </td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form-kind" value="remove-part">
+                        <input type="hidden" name="part-id" value="{{ part.id }}">
+                        <button type="submit" class="btn-submit">Удалить</button>
+                    </form>
                 </td>
             </tr>
         {% empty %}

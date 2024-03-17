@@ -38,14 +38,27 @@
             </div>
 
             <div class="plain-card" style="width: 100%; margin-bottom: 1rem">
+                {% if form.password2.errors %}
+                    <div class="accented-card" style="margin-bottom: 1rem">
+                        <h3>Пароль не соответствует требованиям</h3>
+                        <ul>
+                            <li>Пароль не должен совпадать с остальной информацией</li>
+                            <li>Пароль должен содержать не менее 8 символов</li>
+                            <li>Пароль не может состоять только из цифр</li>
+                            <li>Пароль не должен быть часто используемым</li>
+                        </ul>
+                    </div>
+                {% endif %}
                 <h3>Создать новый аккаунт:</h3>
                 <form method="post">
+                    <input type="hidden" name="form-kind" value="create-account">
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="form-field">
                             <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                             <input type="{{ field.widget_type }}" id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-input">
                         </div>
+                        <div class="form-help">{{ field.help_text }}</div>
                     {% endfor %}
 
                     <div class="form-field">
@@ -78,6 +91,9 @@
                             <th>
                                 Дата и время последнего входа
                             </th>
+                            <th>
+
+                            </th>
                         </tr>
                     </thead>
 
@@ -95,7 +111,18 @@
                             <td>
                                 {{ pleb.last_login|date:"d.m.Y H:i" }}
                             </td>
-
+                            <td>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form-kind" value="account-actions">
+                                    <input type="hidden" name="account-id" value="{{ pleb.id }}">
+                                    {% if pleb.is_active %}
+                                        <button type="submit" class="btn-submit" name="action" value="deactivate">Отключить</button>
+                                    {% else %}
+                                        <button type="submit" class="btn-submit" name="action" value="activate">Включить</button>
+                                    {% endif %}
+                                </form>
+                            </td>
                         </tr>
                     {% endfor %}
                 </table>

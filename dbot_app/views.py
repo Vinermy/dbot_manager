@@ -1,16 +1,31 @@
 import datetime
 import random
+from pathlib import Path
 
 import axes.models
-import borb.pdf as pdf
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect
+from fpdf.fpdf import FPDF
+
 from . import forms
 from .forms import SignupForm, UploadFileForm, PartForm
 from .models import Role, Profile, LaunchStage, DBot, LaunchProcess, DBotPart, DBotPartKind, load_parts_from_file, \
     Comment
+from .pdf import PriceList
+
+
+def permission_required(test):
+    def actual_decorator(func):
+        def wrapper(request, *args, **kwargs):
+            if test(request.user):
+                return func(request, *args, **kwargs)
+            else:
+                return redirect('unauthorized')
+        return wrapper
+
+    return actual_decorator
 
 
 # Create your views here.
@@ -54,16 +69,16 @@ def signin(request):
                     login(request, user, backend='axes.backends.AxesBackend')
                     return redirect('home')
                 else:
-                    return HttpResponse('Disabled account')
+                    return redirect('disabled_account')
             else:
-                return HttpResponse('Invalid login')
+                return redirect('invalid_credentials')
     else:
         form = forms.SigninForm()
     return render(request, 'auth/signin.html', {'form': form})
 
 
 @login_required(login_url='signin')
-@user_passes_test(lambda u: u.can_edit_roles())
+@permission_required(lambda u: u.can_edit_roles())
 def manage_roles(request):
     if request.method == 'POST':
         form = forms.RoleForm(request.POST)
@@ -86,27 +101,38 @@ def log_out(request):
 
 
 @login_required(login_url='signin')
-@user_passes_test(lambda u: u.can_edit_profiles(), login_url='signin')
+@permission_required(lambda u: u.can_edit_profiles())
 def manage_accounts(request):
+    form = SignupForm()
     if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.role = Role.objects.get(id=request.POST['role'])
-            user.save()
-            return redirect('manage_accounts')
+        match request.POST['form-kind']:
+            case 'create-account':
+                form = SignupForm(request.POST)
+                if form.is_valid():
+                    user = form.save(commit=False)
+                    user.role = Role.objects.get(id=request.POST['role'])
+                    user.save()
+            case 'account-actions':
+                account = Profile.objects.get(id=request.POST['account-id'])
+                match request.POST['action']:
+                    case 'activate':
+                        account.is_active = True
+                    case 'deactivate':
+                        account.is_active = False
+                account.save()
+        return redirect('manage_accounts')
 
     ctx = {
         'admins': Profile.objects.filter(is_staff=True),
         'plebs': Profile.objects.filter(is_staff=False),
-        'form': forms.SignupForm(),
+        'form': form,
         'roles': Role.objects.all()
     }
     return render(request, 'manage/accounts.html', ctx)
 
 
 @login_required(login_url='signin')
-@user_passes_test(lambda u: u.is_staff, login_url='signin')
+@permission_required(lambda u: u.is_staff)
 def admin_menu(request):
     if request.method == 'POST':
         data = request.POST
@@ -133,8 +159,9 @@ def admin_menu(request):
     }
     return render(request, 'admin_menu.html', ctx)
 
+
 @login_required(login_url='signin')
-@user_passes_test(lambda u: u.is_staff, login_url='signin')
+@permission_required(lambda u: u.is_staff)
 def auth_logs(request):
     ctx = {
         'logins': axes.models.AccessLog.objects.order_by('-attempt_time').all(),
@@ -148,6 +175,8 @@ def processes_main(request):
     }
     return render(request, 'processes/main.html', ctx)
 
+@login_required(login_url='signin')
+@permission_required(lambda u: u.can_start_process())
 def processes_new(request):
     if request.method == 'POST':
         data = request.POST
@@ -166,13 +195,13 @@ def processes_new(request):
         return redirect('processes_main')
     return render(request, 'processes/new.html')
 
-
+@login_required(login_url='signin')
 def process(request, pk):
     if request.method == 'POST':
         data = request.POST
         match data['form-kind']:
             case 'add-part-to-bot':
-                part = DBotPart.objects.get(id=data['part'])
+                part = DBotPart.objects.get(vendor_code=data['part'])
                 bot = DBot.objects.get(launch_process__id=pk)
                 bot.parts.add(part)
             case 'add-comment':
@@ -233,6 +262,8 @@ def process(request, pk):
     return render(request, 'processes/view.html', ctx)
 
 
+@login_required(login_url='signin')
+@user_passes_test(lambda u: u.can_edit_parts, login_url='signin')
 def manage_parts(request: HttpRequest):
     if request.method == 'POST':
         data = request.POST
@@ -242,6 +273,11 @@ def manage_parts(request: HttpRequest):
                     name=data['name'],
                 )
                 kind.save()
+                return redirect('parts')
+
+            case 'remove-kind':
+                kind = DBotPartKind.objects.get(id=data['kind-id'])
+                kind.delete()
                 return redirect('parts')
 
             case 'add-part-file':
@@ -266,6 +302,7 @@ def manage_parts(request: HttpRequest):
     }
     return render(request, 'manage/parts.html', ctx)
 
+
 def handle_uploaded_file(f):
     with open("temp.xlsx", "wb+") as destination:
         for chunk in f.chunks():
@@ -289,68 +326,47 @@ def bots(request):
 
 
 def generate_price_list(request):
-    date = datetime.date.today().strftime("%d_%m")
-    time = datetime.datetime.now().strftime("%H:%M")
-    doc = pdf.Document()
-    page = pdf.Page()
-    doc.add_page(page)
-    layout: pdf.PageLayout = pdf.SingleColumnLayout(page)
-    bots = list(filter(lambda bot: bot.is_sellable(), DBot.objects.all()))
+    bots = DBot.objects.filter(state='MN').order_by('-price').values_list('vendor_code', 'name', 'price')
 
-    layout.add(pdf.Paragraph(
-        text="Delivery bots price list",
-        horizontal_alignment=pdf.Alignment.CENTERED,
-        font="times-roman",
-    ))
-    layout.add(pdf.Paragraph(
-        text=f"Generated automatically on {date} at {time}",
-        horizontal_alignment=pdf.Alignment.RIGHT,
-        font="times-italic",
-    ))
-    table = pdf.FixedColumnWidthTable(
-        number_of_rows=len(bots) + 1,
-        number_of_columns=3,
-    )
+    row = "<tr><td>{}</td><td>{}</td><td>{}</td></tr>"
 
-    table.add(pdf.Paragraph(
-        text="Vendor code",
-        horizontal_alignment=pdf.Alignment.CENTERED,
-        font="times-roman",
-    ))
-    table.add(pdf.Paragraph(
-        text="Name",
-        horizontal_alignment=pdf.Alignment.CENTERED,
-        font="times-roman",
-    ))
-    table.add(pdf.Paragraph(
-        text="Price",
-        horizontal_alignment=pdf.Alignment.CENTERED,
-        font="times-roman",
-    ))
+    html = ("<table>"
+            "<thead>"
+            "<tr>"
+            "<th>Артикул</th>"
+            "<th>Название</th>"
+            "<th>Цена</th>"
+            "</tr>"
+            "</thead>"
+            "{}"
+            "</table>").format('\n'.join(row.format(code, name, price) for (code, name, price) in bots))
 
-    for bot in bots:
-        table.add(pdf.Paragraph(
-            text=bot.vendor_code,
-            font="times-roman",
-        ))
-        table.add(pdf.Paragraph(
-            text=bot.name,
-            font="times-roman",
-        ))
-        table.add(pdf.Paragraph(
-            text=str(bot.price),
-            font="times-roman",
-        ))
+    doc = PriceList()
+    doc.add_page()
+    doc.write_html(html)
+    doc.output("output.pdf")
 
-    layout.add(table)
-
+    with open("output.pdf", 'rb') as pdf:
+        contents = pdf.read()
 
     response = HttpResponse(
-        doc,
+        contents,
         headers={
             "Content-Type": "application/pdf",
-            "Content-Disposition": f'attachment; filename="price_list_{date}.pdf"'
+            "Content-Disposition": f'attachment; filename="price_list.pdf"'
         },
 
     )
     return response
+
+
+def unauthorized(request):
+    return render(request, 'auth/unauthorized.html')
+
+
+def disabled_account(request):
+    return render(request, 'auth/disabled.html')
+
+
+def invalid_credentials(request):
+    return render(request, 'auth/invalid_credentials.html')

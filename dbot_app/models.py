@@ -14,6 +14,7 @@ class Role(models.Model):
     name = models.CharField(max_length=150)
     can_edit_parts = models.BooleanField(default=False)
     can_edit_bots = models.BooleanField(default=False)
+    can_start_process = models.BooleanField(default=False)
 
 
 
@@ -32,6 +33,9 @@ class Profile(AbstractUser):
     def can_edit_bots(self) -> bool:
         return self.is_staff or self.role.can_edit_bots
 
+    def can_start_process(self) -> bool:
+        return self.is_staff or self.role.can_start_process
+
 
 class DBotPartKind(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -39,10 +43,9 @@ class DBotPartKind(models.Model):
 
 
 class DBotPart(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    vendor_code = models.CharField(max_length=100, primary_key=True)
     name = models.CharField(max_length=512, default='')
-    vendor_code = models.CharField(max_length=20, unique=True)
-    kind = models.ForeignKey(to=DBotPartKind, on_delete=models.SET_NULL, related_name='parts', null=True)
+    kind = models.ForeignKey(to=DBotPartKind, on_delete=models.CASCADE, related_name='parts', null=True)
     weight = models.IntegerField(validators=[MinValueValidator(0)])
     manufacture_date = models.DateField()
 

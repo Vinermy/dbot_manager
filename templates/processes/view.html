@@ -113,7 +113,7 @@
                                 <label for="part-id" class="form-label">Добавить деталь</label>
                                 <select class="form-input" id="part-id" name="part">
                                     {% for part in parts %}
-                                        <option value="{{ part.id }}">
+                                        <option value="{{ part.vendor_code }}">
                                             {{ part.kind.name }} - {{ part.name }} ({{ part.vendor_code }})
                                         </option>
                                     {% endfor %}
